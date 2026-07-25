@@ -1,0 +1,34 @@
+name: Update fortune
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fortune:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install fortune
+        run: sudo apt-get update && sudo apt-get install -y fortune-mod fortunes
+
+      - name: Write README
+        run: |
+          {
+            echo '```'
+            fortune pets magic
+            echo '```'
+          } > README.md
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --cached --quiet || git commit -m "chore: update daily fortune"
+          git push
